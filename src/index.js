@@ -22,8 +22,18 @@ app.use(session({
 // routes ----------------------------------------------
 app.post('/register', ( req , res ) => {
     const { username , email , phone_number , password } = req.body;
-    CreateUsers(username , email , phone_number , 'user' , password);
-    res.send("Created succesfully");
+    
+    if (username.length > 20) {
+        return res.send("Username should only have 20 characters")
+    } else {
+        const passwordRules = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*]).{8,}$/;
+        if (!passwordRules.test(password)) {
+                return res.send("Password must be at least 8 characters and include a capital letter, a number, and a special character");
+        } else {
+            CreateUsers(username , email , phone_number , 'user' , password);
+                res.send(` Welcome ${username}`);
+        }
+    }
 });
 
 app.post('/login', ( req , res ) => {
