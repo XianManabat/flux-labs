@@ -14,17 +14,17 @@ function findUsername(username) {
 }
 
 function verifyPassword ( username , password ) {
-    const user = findUsername(username);
+    const user = findUsername(username);    
     const matched = Bycrypt.compareSync(password , user.password_hash);
     return matched;
 }
 
-function changePassword ( username , Oldpassword , Newpassword ) {
-    const isCorrect = verifyPassword(username , Oldpassword);
+function changePassword ( username , oldPassword , newPassword ) {
+    const isCorrect = verifyPassword(username , oldPassword);
     if (!isCorrect) {
         return false;
     }
-    const newPass = Bycrypt.hashSync(Newpassword , 10);
+    const newPass = Bycrypt.hashSync(newPassword , 10);
     const addnewPass = dbConnect.prepare('UPDATE users SET password_hash = ? WHERE username = ?')
     addnewPass.run(newPass , username);
     return true;
@@ -32,7 +32,7 @@ function changePassword ( username , Oldpassword , Newpassword ) {
 
 
 function editUsers( password , oldUsername , newUsername ) {
-    const isCorrect = verifyPassword(oldUsername, password);
+    const isCorrect = verifyPassword( oldUsername , password);
     if (!isCorrect) {
         return false;
     }
