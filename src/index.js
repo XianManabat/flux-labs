@@ -21,8 +21,8 @@ app.use(session({
 
 // routes ----------------------------------------------
 app.post('/register', ( req , res ) => {
-    const { username , password } = req.body;
-    CreateUsers(username, 'user' , password);
+    const { username , email , phone_number , password } = req.body;
+    CreateUsers(username , email , phone_number , 'user' , password);
     res.send("Created succesfully");
 });
 

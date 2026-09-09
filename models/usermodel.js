@@ -1,10 +1,10 @@
 const dbConnect = require('../db/db.js');
 const Bycrypt = require('bcrypt')
 
-function CreateUsers(username, role, password) {
+function CreateUsers (username , email , phone_number , role, password ) {
     const HashPassword = Bycrypt.hashSync(password, 10);
-    const userTable = dbConnect.prepare('INSERT INTO users (username, role , password_hash) VALUES (?,?,?)');
-    userTable.run( username ,role , HashPassword  );
+    const userTable = dbConnect.prepare('INSERT INTO users ( username , email , phone_number, role , password_hash ) VALUES (?,?,?,?,?)');
+    userTable.run( username , email , phone_number, role , HashPassword  );
 }
 
 function findUsername(username) {
