@@ -1,7 +1,12 @@
+// wag gagalawin ----------------------------------------------
+// wag gagalawin ----------------------------------------------
+// wag gagalawin ----------------------------------------------
+
 const dbConnect = require('../db/db.js');
 const Bycrypt = require('bcrypt');
 const { verificationCode } = require('../utils/mailer.js');
 const verificationCodes = {};
+
 
 function CreateUsers (username , email , phone_number , role, password ) {
     const HashPassword = Bycrypt.hashSync(password, 10);
@@ -20,6 +25,8 @@ function verifyPassword ( username , password ) {
     const matched = Bycrypt.compareSync(password , user.password_hash);
     return matched;
 }
+
+
 
 function storedCode( username , code ) {
     verificationCodes[username] = code;

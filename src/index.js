@@ -1,3 +1,8 @@
+// wag gagalawin ----------------------------------------------
+// wag gagalawin ----------------------------------------------
+// wag gagalawin ----------------------------------------------
+
+
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
@@ -12,17 +17,20 @@ const { verificationCode } = require('../utils/mailer')
 const { requireLogin } = require('../middleware/auth')
 const session = require('express-session');
 
- 
 const app = express();
 
 const PORT = process.env.PORT || 3000;
+// ----------------------------------------------
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, '..' , 'public')));
+
+ 
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false
 }));
+app.use('/private' , requireLogin , express.static(path.join(__dirname,'..','/private')));
 
 // routes ----------------------------------------------
 app.post('/register', ( req , res ) => {
@@ -46,10 +54,16 @@ app.post('/login', ( req , res ) => {
     const isCorrect = verifyPassword( username , password );
     if (isCorrect) {
         req.session.username = username;
-        res.redirect('./dashboard.html');
+        res.redirect('./private/dashboard.html');
     } else {
         res.send("Incorrect username or password, try again!!");
     }
+});
+
+app.get('/logout' , ( req , res) => {
+    req.session.destroy(() => {
+        res.redirect('/index.html');
+    })
 });
 
 // Changing password ------------------------------------------------------
