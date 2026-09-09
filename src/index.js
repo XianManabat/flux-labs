@@ -9,6 +9,7 @@ const { verifyCode } = require('../models/usermodel');
 const { storedCode } = require('../models/usermodel');
 const { editUsers } = require('../models/usermodel');
 const { verificationCode } = require('../utils/mailer')
+const { requireLogin } = require('../middleware/auth')
 const session = require('express-session');
 
  
