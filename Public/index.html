@@ -21,13 +21,21 @@
             <button type="submit" name="register">Log in</button>
         </form>
 
+        <!-- Changing password ------------------------------------------------>
+        <h3>Verify username first</h3>
+        <form action="/forgotPass" method="POST" >
+            <input type="text" name="username">Enter your username</input>
+            <button type="submit" name="verify">Send Code</button>
+        </form>
+
         <h3>Change Password</h3>
         <form action="/changePass" method="POST" >
-            <input type="text" name="username">username</input>
-            <input type="password" name="oldPassword">Old password</input>
+            <input type="text" name="username">Enter your username</input>
+            <input type="text" name="code">Enter your code</input>
             <input type="password" name="newPassword">New password</input>
-            <button type="submit" name="register">Log in</button>
+            <button type="submit" name="register">Change Password</button>
         </form>
+        <!-- Changing password ------------------------------------------------>
 
         <h3>Change username</h3>
         <form action="/changeName" method="POST" >

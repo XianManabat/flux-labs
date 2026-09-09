@@ -1,5 +1,7 @@
 const dbConnect = require('../db/db.js');
-const Bycrypt = require('bcrypt')
+const Bycrypt = require('bcrypt');
+const { verificationCode } = require('../utils/mailer.js');
+const verificationCodes = {};
 
 function CreateUsers (username , email , phone_number , role, password ) {
     const HashPassword = Bycrypt.hashSync(password, 10);
@@ -19,8 +21,21 @@ function verifyPassword ( username , password ) {
     return matched;
 }
 
-function changePassword ( username , oldPassword , newPassword ) {
-    const isCorrect = verifyPassword(username , oldPassword);
+function storedCode( username , code ) {
+    verificationCodes[username] = code;
+};
+function verifyCode ( username , code ) {
+    const storedCode = verificationCodes[username];
+    if (storedCode == code ) {
+        return true;
+    } else {
+        return false;
+    }
+};
+
+// TO UPDATE
+function changePassword ( username , code , newPassword ) {
+    const isCorrect = verifyCode( username , code );
     if (!isCorrect) {
         return false;
     }
@@ -29,6 +44,7 @@ function changePassword ( username , oldPassword , newPassword ) {
     addnewPass.run(newPass , username);
     return true;
 }
+
 
 
 function editUsers( password , oldUsername , newUsername ) {
@@ -41,6 +57,6 @@ function editUsers( password , oldUsername , newUsername ) {
     return true;
 }
 
-module.exports = { CreateUsers , findUsername , verifyPassword , changePassword ,  editUsers };
+module.exports = { CreateUsers , findUsername , verifyPassword , changePassword ,  editUsers , verifyCode , storedCode};
 
  
