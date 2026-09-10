@@ -38,6 +38,7 @@ function verifyCode ( username , code ) {
     } else {
         return false;
     }
+    
 };
 
  
