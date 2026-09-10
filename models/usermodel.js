@@ -40,7 +40,7 @@ function verifyCode ( username , code ) {
     }
 };
 
-// TO UPDATE
+ 
 function changePassword ( username , code , newPassword ) {
     const isCorrect = verifyCode( username , code );
     if (!isCorrect) {
