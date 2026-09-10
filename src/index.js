@@ -89,7 +89,7 @@ app.post('/forgotPass' , (req , res) => {
     res.send("Your verification code is sent")
 });
 
-// Changing password ------------------------------------------------------
+// Changing password ----------------------------------------------------
 
 app.post('/changeName', ( req , res) => {
     const { password , oldUsername , newUsername } = req.body;
