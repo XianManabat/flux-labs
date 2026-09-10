@@ -142,7 +142,7 @@ vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
 
-#databases
+# databases
 db/database.sqlite
 db/*.sqlite
 db/*.sqlite3
