@@ -33,6 +33,9 @@ app.use(session({
 app.use('/private' , requireLogin , express.static(path.join(__dirname,'..','/private')));
 
 // routes ----------------------------------------------
+// create users 
+// note : add error messages
+// ----------------------------------------------
 app.post('/register', ( req , res ) => {
     const { username , email , phone_number , password } = req.body;
     
@@ -43,8 +46,13 @@ app.post('/register', ( req , res ) => {
         if (!passwordRules.test(password)) {
                 return res.send("Password must be at least 8 characters and include a capital letter, a number, and a special character");
         } else {
-            CreateUsers(username , email , phone_number , 'user' , password);
-                res.send(` Welcome ${username}`);
+            try {
+                CreateUsers(username , email , phone_number , 'user' , password);
+                res.redirect('/index.html')
+                // to be forwarded to the log in
+            } catch(error) {
+                res.send("That username or email is already taken");
+            }
         }
     }
 });
