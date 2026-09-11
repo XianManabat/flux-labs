@@ -9,7 +9,7 @@ db.exec(`
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
         phone_number TEXT UNIQUE,
-        email TEXT UNIQUE NOT NULL,
+        email TEXT ,
         role TEXT NOT NULL,
         password_hash TEXT NOT NULL
 
