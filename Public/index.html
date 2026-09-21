@@ -2,6 +2,7 @@
 <html lang="en">
     <head>
         <title>Flux Labs</title>
+        <link rel="stylesheet" href="/css/style.css">
     </head>
     <body>
         <!-- note: 
@@ -13,46 +14,66 @@
         <!-- note: 
          Di na iseeseparate files yung mga code sa loob nito, gawan nyo nalang ng interface na pinapaita sila one at a time.
           ------------------------------------------------>
-        <h3>Registration form</h3>
-        <form action="/register" method="POST" >
-            <input type="text" name="username">username</input>
-            <input type="text" name="email">Email</input>
-            <input type="text" name="phone_number">Phone Number</input>
-            <input type="password" name="password">password</input>
-            <button type="submit" name="register">Register</button>
-        </form>
 
-        <h3>Log in form</h3>
-        <form action="/login" method="POST" >
-            <input type="text" name="username">username</input>
-            <input type="password" name="password">password</input>
-            <button type="submit" name="register">Log in</button>
-        </form>
+        <div class="container">
 
-        <!-- Changing password ------------------------------------------------>
-        <h3>Verify username first</h3>
-        <form action="/forgotPass" method="POST" >
-            <input type="text" name="username">Enter your username</input>
-            <button type="submit" name="verify">Send Code</button>
-        </form>
-
-        <h3>Change Password</h3>
-        <form action="/changePass" method="POST" >
-            <input type="text" name="username">Enter your username</input>
-            <input type="text" name="code">Enter your code</input>
-            <input type="password" name="newPassword">New password</input>
-            <button type="submit" name="register">Change Password</button>
-        </form>
-        <!-- Changing password ------------------------------------------------>
-
-        <h3>Change username</h3>
-        <form action="/changeName" method="POST" >
-            <input type="text" name="oldUsername">Old username</input>
-            <input type="text" name="newUsername">New username</input>
-            <input type="password" name="password">password</input>
-            <button type="submit" name="register">Log in</button>
-        </form>
+            <div class="tabs">
+                <button onclick="showForm('register')">Register</button>
+                <button onclick="showForm('login')">Log in</button>
+                <button onclick="showForm('forgot')">Forgot Password</button>
+                <button onclick="showForm('changeName')">Change Username</button>
+             </div>
 
 
+            <h3>Registration form</h3>
+
+            <form id="register" action="/register" method="POST" >
+                <input type="text" name="username">username</input>
+                <input type="text" name="email">Email</input>
+                <input type="text" name="phone_number">Phone Number</input>
+                <input type="password" name="password">password</input>
+                <button type="submit" name="register">Register</button>
+
+                <div id="forgetRoute">
+                    <h3 onclick="showForm('forgot')" style="cursor:pointer; text-decoration:underline;">Forgot password?</h3>
+                </div>
+
+            </form>
+
+            <h3>Log in form</h3>
+            <form id="login" action="/login" method="POST" >
+                <input type="text" name="username">username</input>
+                <input type="password" name="password">password</input>
+                <button type="submit" name="register">Log in</button>
+            </form>
+
+            <!-- Changing password ------------------------------------------------>
+             <div id="forgot">
+                <h3>Verify username first</h3>
+                <form action="/forgotPass" method="POST" >
+                    <input type="text" name="username">Enter your username</input>
+                    <button type="submit" name="verify">Send Code</button>
+                </form>
+
+                <h3>Change Password</h3>
+                <form action="/changePass" method="POST" >
+                    <input type="text" name="username">Enter your username</input>
+                    <input type="text" name="code">Enter your code</input>
+                    <input type="password" name="newPassword">New password</input>
+                    <button type="submit" name="register">Change Password</button>
+                </form>
+            </div>
+            <!-- Changing password ------------------------------------------------>
+
+            <form id="changeName" action="/changeName" method="POST" >
+                <h3>Change username</h3>
+                <input type="text" name="oldUsername">Old username</input>
+                <input type="text" name="newUsername">New username</input>
+                <input type="password" name="password">password</input>
+                <button type="submit" name="register">Change Username</button>
+            </form>
+        </div>  
+
+        <script src="/jsStyles/styles.js"></script>
     </body>
 </html>
