@@ -1,10 +1,11 @@
 // wag gagalawin ----------------------------------------------
 // wag gagalawin ----------------------------------------------
 // wag gagalawin ----------------------------------------------
-
-
+ 
 require('dotenv').config();
 const express = require('express');
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, '..' , 'views'));
 const path = require('path');
 const { CreateUsers } = require('../models/usermodel');
 const { findUsername } = require('../models/usermodel');
@@ -30,11 +31,13 @@ app.use(session({
     resave: false,
     saveUninitialized: false
 }));
-app.use('/private' , requireLogin , express.static(path.join(__dirname,'..','/private')));
+app.get('/private/dashboard' , requireLogin, ( res , req ) => {
+    res.render('dashboard' , { username: req.session.username });
+});
 
 // routes ----------------------------------------------
 // create users 
-// note : add error messages
+// note : done
 // ----------------------------------------------
 app.post('/register', ( req , res ) => {
     const { username , email , phone_number , password } = req.body;
