@@ -4,8 +4,6 @@
  
 require('dotenv').config();
 const express = require('express');
-app.set('view engine', 'ejs');
-app.set('views', path.join(__dirname, '..' , 'views'));
 const path = require('path');
 const { CreateUsers } = require('../models/usermodel');
 const { findUsername } = require('../models/usermodel');
@@ -31,7 +29,10 @@ app.use(session({
     resave: false,
     saveUninitialized: false
 }));
-app.get('/private/dashboard' , requireLogin, ( res , req ) => {
+
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, '..' , 'views'));
+app.get('/private/dashboard' , requireLogin, ( req , res ) => {
     res.render('dashboard' , { username: req.session.username });
 });
 
@@ -65,7 +66,7 @@ app.post('/login', ( req , res ) => {
     const isCorrect = verifyPassword( username , password );
     if (isCorrect) {
         req.session.username = username;
-        res.redirect('./private/dashboard.html');
+        res.redirect('./views/index.ejs');
     } else {
         res.send("Incorrect username or password, try again!!");
     }
