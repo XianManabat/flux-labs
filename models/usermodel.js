@@ -1,27 +1,32 @@
 // wag gagalawin ----------------------------------------------
 // wag gagalawin ----------------------------------------------
 // wag gagalawin ----------------------------------------------
-
+const { createClient } = require('@libsql/client');
 const dbConnect = require('../db/db.js');
 const Bycrypt = require('bcrypt');
 const { verificationCode } = require('../utils/mailer.js');
 const verificationCodes = {};
 
 
-function CreateUsers (username , email , phone_number , role, password ) {
+async function CreateUsers (username , email , phone_number , role, password ) {
     const HashPassword = Bycrypt.hashSync(password, 10);
-    const userTable = dbConnect.prepare('INSERT INTO users ( username , email , phone_number, role , password_hash ) VALUES (?,?,?,?,?)');
-    userTable.run( username , email , phone_number, role , HashPassword  );
+    await dbConnect.execute({
+        sql: 'INSERT INTO users (username, email, phone_number, role, password_hash) VALUES (?,?,?,?,?)',
+        args: [username, email, phone_number, role, HashPassword]
+    });
+    
 }
 
-function findUsername(username) {
-    const usernamFinder = dbConnect.prepare('SELECT * FROM users WHERE username = ?');
-    const user = usernamFinder.get(username);
-    return user;
+async function findUsername(username) {
+    const result = await dbConnect.execute({
+        sql: 'SELECT * FROM users WHERE username = ?',
+        args: [username]
+    });
+    return result.rows[0];
 }
 
-function verifyPassword ( username , password ) {
-    const user = findUsername(username);    
+async function verifyPassword ( username , password ) {
+    const user = await findUsername(username);    
     const matched = Bycrypt.compareSync(password , user.password_hash);
     return matched;
 }
@@ -42,20 +47,23 @@ function verifyCode ( username , code ) {
 };
 
  
-function changePassword ( username , code , newPassword ) {
+async function changePassword ( username , code , newPassword ) {
     const isCorrect = verifyCode( username , code );
     if (!isCorrect) {
         return false;
     }
     const newPass = Bycrypt.hashSync(newPassword , 10);
-    const addnewPass = dbConnect.prepare('UPDATE users SET password_hash = ? WHERE username = ?')
-    addnewPass.run(newPass , username);
+    const addnewPass = await dbConnect.execute ({
+        sql: 'UPDATE users SET password_hash = ? WHERE username = ?',
+        args: [newPass , username]
+    });
     return true;
+    addnewPass();
 }
 
 
 
-function editUsers( password , oldUsername , newUsername ) {
+async function editUsers( password , oldUsername , newUsername ) {
     const isCorrect = verifyPassword( oldUsername , password);
     if (!isCorrect) {
         return false;
