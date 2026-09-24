@@ -1,23 +1,12 @@
-const { createClient } = require('@libsql/client');
+// db.js
+const postgres = require('postgres');
 
-const db = createClient({
-    url: process.env.TURSO_DATABASE_URL,
-    authToken: process.env.TURSO_AUTH_TOKEN
+const sql = postgres(process.env.DATABASE_URL, {
+  ssl: 'require',
+  max: 1,                 // required for Vercel serverless
+  idle_timeout: 20,
+  connect_timeout: 10,
+  prepare: false,         // required for Supabase transaction pooler
 });
 
-async function intDb() {
-    await db.execute(`
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
-            phone_number TEXT UNIQUE,
-            email TEXT UNIQUE NOT NULL,
-            role TEXT NOT NULL,
-            password_hash TEXT NOT NULL
-        )
-        `)
-}
-
-intDb();
-
-module.exports = db;
+module.exports = sql;

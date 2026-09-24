@@ -6,7 +6,7 @@ function requireLogin( req , res , next ) {
     if (req.session.username) {
         next();
     } else {
-        res.redirect('./index.html');
+        res.redirect('/login');
     }
 }
 
