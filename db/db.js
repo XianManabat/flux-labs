@@ -1,12 +1,22 @@
-// db.js
-const postgres = require('postgres');
+const Database = require('better-sqlite3');
+const path = require('path');
 
-const sql = postgres(process.env.DATABASE_URL, {
-  ssl: 'require',
-  max: 1,                 // required for Vercel serverless
-  idle_timeout: 20,
-  connect_timeout: 10,
-  prepare: false,         // required for Supabase transaction pooler
-});
+const db = new Database(path.join(__dirname, 'database.sqlite'));
 
-module.exports = sql;
+db.exec(`
+    
+    CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT UNIQUE NOT NULL,
+        phone_number TEXT UNIQUE,
+        email TEXT UNIQUE NOT NULL,
+        role TEXT NOT NULL,
+        password_hash TEXT NOT NULL
+
+    )
+    
+    `);
+
+    
+
+module.exports = db;
