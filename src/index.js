@@ -13,18 +13,21 @@ const { storedCode } = require('../models/usermodel');
 const { editUsers } = require('../models/usermodel');
 const { verificationCode } = require('../utils/mailer')
 const { requireLogin } = require('../middleware/auth')
+const { maintenanceGate } = require('../middleware/maintenance');   // NEW
+const { seedDefaultAdmin , setupAdmin } = require('../models/adminmodel');   // NEW
 const session = require('express-session');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // ----------------------------------------------
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, '..' , 'public')));
 app.use(session({
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false
 }));
+app.use(maintenanceGate);   // NEW: must be after session, before static
+app.use(express.static(path.join(__dirname, '..' , 'public')));
 app.use('/private' , requireLogin , express.static(path.join(__dirname,'..','/private')));
 
 // routes ----------------------------------------------
@@ -53,7 +56,9 @@ app.post('/login', ( req , res ) => {
     const isCorrect = verifyPassword( username , password );
 
     if (isCorrect) {
+        const user = findUsername(username);   // NEW
         req.session.username = username;
+        req.session.role = user.role;          // NEW: gate reads this
         res.redirect('./private/dashboard.html');
     } else {
         res.send("Incorrect username or password, try again!!");
@@ -64,6 +69,26 @@ app.get('/logout' , ( req , res) => {
     req.session.destroy(() => {
         res.redirect('/index.html');
     })
+});
+
+// Admin setup (replaces the default admin credentials) -- NEW
+app.post('/admin-setup', ( req , res ) => {
+    if (req.session.role !== 'admin') {
+        return res.status(403).send("Admins only");
+    }
+    const { newUsername , newPassword } = req.body;
+
+    if (newUsername === process.env.ADMIN_USER) {
+        return res.send("Choose a different username than the default");
+    }
+    const ok = setupAdmin( req.session.username , newUsername , newPassword );
+
+    if (ok) {
+        req.session.username = newUsername;
+        res.redirect('/private/dashboard.html');
+    } else {
+        res.send("Username already taken");
+    }
 });
 
 // Password reset --------------------------------------
@@ -99,6 +124,9 @@ app.post('/changeName', ( req , res) => {
         res.send("Incorrect old username or password, Try again!!");
     }
 });
+
+// Startup ---------------------------------------------
+seedDefaultAdmin();   // NEW: creates the default admin once, if none exists
 
 // do not tamper ------------------------------------------------------
 app.listen(PORT, () =>{
