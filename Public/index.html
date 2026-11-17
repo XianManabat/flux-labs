@@ -1,79 +1,529 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Flux Labs</title>
-        <link rel="stylesheet" href="/css/style.css">
+        <style>
+            :root {
+                --ink: #10230f;
+                --muted: #5b6b58;
+                --green: #2e8b3a;
+                --deep: #14532d;
+                --line: #e3eadf;
+                --soft: #f3f7f1;
+                --card: #ffffff;
+                --font: "Segoe UI", system-ui, -apple-system, Roboto, Helvetica, Arial, sans-serif;
+            }
+
+            * { box-sizing: border-box; }
+            html { scroll-behavior: smooth; }
+            body {
+                margin: 0;
+                min-height: 100vh;
+                font-family: var(--font);
+                color: var(--ink);
+                background: #1b4d2e;
+                line-height: 1.55;
+            }
+            a { color: var(--deep); text-decoration: none; }
+            h1, h2, h3, p { margin: 0; }
+            :focus-visible { outline: 2px solid var(--green); outline-offset: 2px; }
+
+            /* ---------- Full-screen scenery behind everything ---------- */
+            .scene { position: fixed; inset: 0; width: 100%; height: 100%; z-index: -2; }
+            .scene-shade { position: fixed; inset: 0; z-index: -1; background: rgba(5, 25, 10, .22); }
+
+            /* ---------- Buttons & inputs ---------- */
+            .btn {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: .5rem;
+                padding: .7rem 1.3rem;
+                border: 1px solid var(--deep);
+                border-radius: 999px;
+                font: inherit;
+                font-size: .92rem;
+                font-weight: 600;
+                cursor: pointer;
+                color: #fff;
+                background: var(--deep);
+                transition: background .15s, transform .15s;
+            }
+            .btn:hover { background: var(--green); border-color: var(--green); transform: translateY(-1px); }
+            .btn.ghost { color: var(--ink); background: transparent; border-color: #cfd9cb; }
+            .btn.ghost:hover { background: var(--soft); border-color: #cfd9cb; }
+
+            input {
+                width: 100%;
+                padding: .8rem 1rem;
+                font: inherit;
+                color: var(--ink);
+                background: var(--soft);
+                border: 1px solid var(--line);
+                border-radius: 12px;
+            }
+            input::placeholder { color: #8a9a86; }
+            input:focus { border-color: var(--green); outline: none; background: #fff; }
+
+            /* ---------- Hero card ---------- */
+            .shell { width: min(1180px, 94%); margin: clamp(.8rem, 3vh, 2rem) auto 0; }
+            .hero-card {
+                display: grid;
+                grid-template-columns: 1fr 1.05fr;
+                gap: 1rem;
+                padding: 1rem;
+                background: var(--card);
+                border-radius: 30px;
+                min-height: min(680px, 88vh);
+                box-shadow: 0 30px 80px rgba(0, 0, 0, .25);
+            }
+
+            .hero-left { display: flex; flex-direction: column; justify-content: space-between; padding: .6rem 1.2rem 1.2rem; }
+            .topbar { display: flex; align-items: center; justify-content: space-between; gap: 1rem; position: relative; }
+            .brand { display: inline-flex; align-items: center; gap: .5rem; font-weight: 700; font-size: .95rem; color: var(--ink); }
+            .brand svg { width: 22px; height: 22px; }
+            .menu { display: flex; align-items: center; gap: 1.4rem; font-size: .8rem; }
+            .menu a { color: var(--ink); }
+            .menu a:hover { color: var(--green); }
+            .burger {
+                display: none;
+                width: 36px; height: 36px;
+                align-items: center; justify-content: center;
+                background: transparent;
+                border: 1px solid var(--line);
+                border-radius: 10px;
+                cursor: pointer;
+                color: var(--ink);
+            }
+
+            .hero-copy h1 {
+                font-size: clamp(2rem, 3.8vw, 3.1rem);
+                font-weight: 500;
+                letter-spacing: -.02em;
+                line-height: 1.15;
+            }
+            .hl {
+                display: inline-block;
+                padding: 0 .3em;
+                color: #fff;
+                border-radius: .28em;
+                background:
+                    radial-gradient(120% 120% at 15% 0, #6cc25d 0, transparent 55%),
+                    linear-gradient(135deg, #2f7d32, #1b4d2e);
+            }
+            .hero-copy p { margin: 1.2rem 0 1.5rem; max-width: 44ch; font-size: .82rem; color: var(--muted); }
+            .cta { display: flex; flex-wrap: wrap; gap: .7rem; }
+
+            /* Right image panel */
+            .art { position: relative; border-radius: 24px; overflow: hidden; min-height: 520px; }
+            .art > svg.fill { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+            .pin { position: absolute; }
+            .pin .label {
+                display: inline-block;
+                padding: .35rem .8rem;
+                font-size: .72rem;
+                font-weight: 600;
+                background: #fff;
+                border-radius: 999px;
+                box-shadow: 0 6px 18px rgba(0, 0, 0, .15);
+            }
+            .pin .stem { position: absolute; left: 14px; top: 100%; width: 2px; height: 30px; background: #fff; }
+            .pin .dot {
+                position: absolute;
+                left: 6px;
+                top: calc(100% + 26px);
+                width: 18px; height: 18px;
+                background: #58c24d;
+                border: 3px solid #fff;
+                border-radius: 50%;
+                box-shadow: 0 3px 10px rgba(0, 0, 0, .25);
+            }
+            .pin.one { top: 14%; left: 12%; }
+            .pin.two { top: 54%; right: 16%; }
+
+            .notch {
+                position: absolute;
+                right: 0; bottom: 0;
+                display: flex;
+                gap: 1.3rem;
+                padding: 1rem 1.5rem;
+                background: #fff;
+                border-top-left-radius: 24px;
+                border-bottom-right-radius: 24px;
+            }
+            .notch a { display: inline-flex; color: var(--ink); }
+            .notch a:hover { color: var(--green); }
+            .notch svg { width: 22px; height: 22px; }
+
+            /* ---------- Sections below the hero ---------- */
+            .stack { width: min(1180px, 94%); margin: 1rem auto 0; display: grid; gap: 1rem; }
+            .panel-section {
+                padding: clamp(1.4rem, 4vw, 2.6rem);
+                background: var(--card);
+                border-radius: 30px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, .18);
+                scroll-margin-top: 1rem;
+            }
+            .section-head { max-width: 52ch; margin-bottom: 1.8rem; }
+            .section-head h2 { font-size: 1.7rem; font-weight: 600; letter-spacing: -.01em; margin-bottom: .4rem; }
+            .section-head p { color: var(--muted); font-size: .95rem; }
+
+            .flow { display: grid; grid-template-columns: 1fr auto 1fr auto 1fr; gap: 1rem; align-items: stretch; }
+            .flow-step { background: var(--soft); border: 1px solid var(--line); border-radius: 20px; padding: 1.5rem; }
+            .flow-step .num {
+                display: inline-grid; place-items: center;
+                width: 28px; height: 28px; margin-bottom: .8rem;
+                font-size: .85rem; font-weight: 700; color: #fff;
+                background: var(--deep); border-radius: 50%;
+            }
+            .flow-step svg { display: block; width: 44px; height: 44px; margin-bottom: .8rem; stroke: var(--green); }
+            .flow-step h3 { margin-bottom: .35rem; font-size: 1.05rem; }
+            .flow-step p { color: var(--muted); font-size: .9rem; }
+            .flow-arrow { align-self: center; color: #b9c8b4; font-size: 1.8rem; }
+
+            .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+            .card { background: var(--soft); border: 1px solid var(--line); border-radius: 20px; padding: 1.5rem; }
+            .card .icon { width: 28px; height: 28px; stroke: var(--green); margin-bottom: .8rem; }
+            .card h3 { margin-bottom: .35rem; font-size: 1.05rem; }
+            .card p { color: var(--muted); font-size: .9rem; }
+
+            /* Access (log in, register, ...) */
+            .access { display: grid; grid-template-columns: .9fr 1.1fr; gap: 2.5rem; align-items: start; }
+            .access-card { background: var(--soft); border: 1px solid var(--line); border-radius: 22px; padding: 1.4rem; }
+            .tabs { display: flex; flex-wrap: wrap; gap: .3rem; margin-bottom: 1.3rem; padding: .3rem; background: #fff; border-radius: 999px; }
+            .tabs button {
+                flex: 1 1 auto;
+                padding: .5rem .8rem;
+                font: inherit; font-size: .82rem;
+                color: var(--muted);
+                background: transparent;
+                border: 0; border-radius: 999px;
+                cursor: pointer;
+            }
+            .tabs button:hover { color: var(--ink); }
+            .tabs button.active { color: #fff; background: var(--deep); font-weight: 600; }
+
+            .panel { display: none; flex-direction: column; gap: .8rem; }
+            .panel.active { display: flex; }
+            .panel h3 { font-size: 1.15rem; margin-bottom: .1rem; }
+            .panel form { display: flex; flex-direction: column; gap: .8rem; }
+            .panel .subform + .subform { margin-top: 1.2rem; padding-top: 1.2rem; border-top: 1px solid var(--line); }
+            #forgetRoute { font-size: .88rem; text-align: center; }
+            #forgetRoute a { text-decoration: underline; }
+
+            footer.site-footer { width: min(1180px, 94%); margin: 1.2rem auto 0; padding: 0 0 2rem; color: #e6f1e1; font-size: .85rem; text-align: center; }
+
+            /* ---------- Responsive ---------- */
+            @media (max-width: 900px) {
+                .hero-card { grid-template-columns: 1fr; min-height: 0; }
+                .hero-left { gap: 2rem; }
+                .art { min-height: 360px; order: -1; }
+                .burger { display: inline-flex; }
+                .menu {
+                    display: none;
+                    position: absolute; top: 44px; right: 0; z-index: 5;
+                    flex-direction: column; align-items: flex-start; gap: .8rem;
+                    padding: 1rem 1.2rem;
+                    background: #fff;
+                    border: 1px solid var(--line);
+                    border-radius: 14px;
+                    box-shadow: 0 12px 30px rgba(0, 0, 0, .15);
+                }
+                .menu.open { display: flex; }
+                .flow { grid-template-columns: 1fr; }
+                .flow-arrow { transform: rotate(90deg); justify-self: center; }
+                .cards { grid-template-columns: 1fr; }
+                .access { grid-template-columns: 1fr; gap: 1.2rem; }
+            }
+            @media (prefers-reduced-motion: reduce) {
+                html { scroll-behavior: auto; }
+                .btn { transition: none; }
+            }
+        </style>
     </head>
     <body>
-        <!-- note: 
+
+        <!-- Shared artwork: rolling green hills (used for the background and the hero image) -->
+        <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+            <defs>
+                <linearGradient id="hSky" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#173f25"/><stop offset="1" stop-color="#256a30"/>
+                </linearGradient>
+                <linearGradient id="hL1" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#4a9a3c"/><stop offset="1" stop-color="#2a6a2e"/>
+                </linearGradient>
+                <linearGradient id="hL2" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#74c04c"/><stop offset="1" stop-color="#3f8f3a"/>
+                </linearGradient>
+                <linearGradient id="hL3" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#9ad65a"/><stop offset="1" stop-color="#4f9f42"/>
+                </linearGradient>
+                <linearGradient id="hL4" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#5eab3f"/><stop offset="1" stop-color="#2e6e2f"/>
+                </linearGradient>
+                <linearGradient id="hL5" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#235f2b"/><stop offset="1" stop-color="#113a1b"/>
+                </linearGradient>
+
+                <g id="hills-art">
+                    <rect width="800" height="800" fill="url(#hSky)"/>
+                    <path d="M0 230 C110 150 230 250 350 190 S610 90 800 200 V800 H0Z" fill="url(#hL1)"/>
+                    <path d="M0 330 C130 250 250 360 400 290 S650 200 800 300 V800 H0Z" fill="url(#hL2)"/>
+                    <path d="M0 470 C150 370 300 500 450 410 S700 330 800 420 V800 H0Z" fill="url(#hL3)"/>
+                    <path d="M0 600 C180 520 330 650 520 560 S720 500 800 540 V800 H0Z" fill="url(#hL4)"/>
+                    <path d="M0 720 C200 660 360 760 540 700 S740 660 800 690 V800 H0Z" fill="url(#hL5)"/>
+                    <g fill="none" stroke="#c4ec8a" stroke-opacity=".35" stroke-width="3" stroke-linecap="round">
+                        <path d="M0 230 C110 150 230 250 350 190 S610 90 800 200"/>
+                        <path d="M0 330 C130 250 250 360 400 290 S650 200 800 300"/>
+                        <path d="M0 470 C150 370 300 500 450 410 S700 330 800 420"/>
+                    </g>
+                </g>
+            </defs>
+        </svg>
+
+        <svg class="scene" viewBox="0 0 800 800" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#hills-art"/></svg>
+        <div class="scene-shade"></div>
+
+        <!-- note:
          Lagyan nyo ng design ng design na mag mumukhan landing page (konting infographic , and etc......) para mag mukhang infographics talaga.
           ------------------------------------------------>
-        
 
-        <!-- Log in, sign up, change password, change username ------------------------------------------------>
-        <!-- note: 
-         Di na iseeseparate files yung mga code sa loob nito, gawan nyo nalang ng interface na pinapaita sila one at a time.
-          ------------------------------------------------>
+        <!-- Hero ------------------------------------------------>
+        <div class="shell">
+            <div class="hero-card">
 
-        <div class="container">
+                <div class="hero-left">
+                    <header class="topbar">
+                        <a class="brand" href="/index.html">
+                            <svg viewBox="0 0 32 32" fill="none" aria-hidden="true">
+                                <circle cx="16" cy="16" r="16" fill="#2e8b3a"/>
+                                <path d="M6 18h5l3-8 5 14 3-9 2 3h4" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                            FLUX LABS
+                        </a>
+                        <nav class="menu" id="menu">
+                            <a href="#how">How it works</a>
+                            <a href="#features">Features</a>
+                            <a href="#access" onclick="showForm('login')">Log in</a>
+                        </nav>
+                        <button class="burger" type="button" aria-label="Menu" aria-controls="menu" onclick="document.getElementById('menu').classList.toggle('open')">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+                        </button>
+                    </header>
 
-            <div class="tabs">
-                <button onclick="showForm('register')">Register</button>
-                <button onclick="showForm('login')">Log in</button>
-                <button onclick="showForm('forgot')">Forgot Password</button>
-                <button onclick="showForm('changeName')">Change Username</button>
-             </div>
-
-
-            <h3>Registration form</h3>
-
-            <form id="register" class="active" action="/register" method="POST" >
-                <input type="text" name="username">username</input>
-                <input type="text" name="email">Email</input>
-                <input type="text" name="phone_number">Phone Number</input>
-                <input type="password" name="password">password</input>
-                <button type="submit" name="register">Register</button>
-
-                <div id="forgetRoute">
-                    <h3 onclick="showForm('forgot')" style="cursor:pointer; text-decoration:underline;">Forgot password?</h3>
+                    <div class="hero-copy">
+                        <h1>Connecting <span class="hl">devices,</span><br>Uniting every reading</h1>
+                        <p>Flux Labs collects data from your connected devices and shows it on one dashboard you can open from any browser, so you always know what is happening.</p>
+                        <div class="cta">
+                            <a class="btn" href="#access" onclick="showForm('login')">Log in <span aria-hidden="true">&nearr;</span></a>
+                            <a class="btn ghost" href="#access" onclick="showForm('register')">Create account</a>
+                        </div>
+                    </div>
                 </div>
 
-            </form>
+                <div class="art" aria-hidden="true">
+                    <svg class="fill" viewBox="0 130 800 600" preserveAspectRatio="xMidYMid slice"><use href="#hills-art"/></svg>
 
-            <h3>Log in form</h3>
-            <form id="login" action="/login" method="POST" >
-                <input type="text" name="username">username</input>
-                <input type="password" name="password">password</input>
-                <button type="submit" name="register">Log in</button>
-            </form>
+                    <div class="pin one">
+                        <span class="label">Live readings</span>
+                        <span class="stem"></span>
+                        <span class="dot"></span>
+                    </div>
+                    <div class="pin two">
+                        <span class="label">Smart alerts</span>
+                        <span class="stem"></span>
+                        <span class="dot"></span>
+                    </div>
 
-            <!-- Changing password ------------------------------------------------>
-             <div id="forgot">
-                <h3>Verify username first</h3>
-                <form action="/forgotPass" method="POST" >
-                    <input type="text" name="username">Enter your username</input>
-                    <button type="submit" name="verify">Send Code</button>
-                </form>
+                    <div class="notch">
+                        <a href="#features" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>
+                        </a>
+                        <a href="#features" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8M10 20a2 2 0 0 0 4 0"/></svg>
+                        </a>
+                        <a href="#access" tabindex="-1">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+                        </a>
+                    </div>
+                </div>
 
-                <h3>Change Password</h3>
-                <form action="/changePass" method="POST" >
-                    <input type="text" name="username">Enter your username</input>
-                    <input type="text" name="code">Enter your code</input>
-                    <input type="password" name="newPassword">New password</input>
-                    <button type="submit" name="register">Change Password</button>
-                </form>
             </div>
-            <!-- Changing password ------------------------------------------------>
+        </div>
 
-            <form id="changeName" action="/changeName" method="POST" >
-                <h3>Change username</h3>
-                <input type="text" name="oldUsername">Old username</input>
-                <input type="text" name="newUsername">New username</input>
-                <input type="password" name="password">password</input>
-                <button type="submit" name="register">Change Username</button>
-            </form>
-        </div>  
+        <main class="stack">
 
-        <script src="/jsStyles/styles.js"></script>
+            <!-- Infographic: how it works ------------------------------------------------>
+            <section class="panel-section" id="how">
+                <div class="section-head">
+                    <h2>How it works</h2>
+                    <p>Three steps from the sensor to your screen.</p>
+                </div>
+
+                <div class="flow">
+                    <div class="flow-step">
+                        <span class="num">1</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="12" height="12" rx="2"/><path d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4"/></svg>
+                        <h3>Devices collect</h3>
+                        <p>Sensor nodes measure and send their readings to the server.</p>
+                    </div>
+                    <div class="flow-arrow" aria-hidden="true">&rarr;</div>
+                    <div class="flow-step">
+                        <span class="num">2</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="6" rx="8" ry="3"/><path d="M4 6v6c0 1.7 3.6 3 8 3s8-1.3 8-3V6M4 12v6c0 1.7 3.6 3 8 3s8-1.3 8-3v-6"/></svg>
+                        <h3>Server stores</h3>
+                        <p>The Flux Labs server receives the data and keeps it organized.</p>
+                    </div>
+                    <div class="flow-arrow" aria-hidden="true">&rarr;</div>
+                    <div class="flow-step">
+                        <span class="num">3</span>
+                        <svg viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8M12 17v4M7 13l3-3 3 2 4-5"/></svg>
+                        <h3>You monitor</h3>
+                        <p>Log in to see readings and notifications on your dashboard.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Features ------------------------------------------------>
+            <section class="panel-section" id="features">
+                <div class="section-head">
+                    <h2>What you get</h2>
+                </div>
+
+                <div class="cards">
+                    <div class="card">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-8 4 16 3-8h4"/></svg>
+                        <h3>Readings</h3>
+                        <p>See the overall readings from your device in one view.</p>
+                    </div>
+                    <div class="card">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8M10 20a2 2 0 0 0 4 0"/></svg>
+                        <h3>Notifications</h3>
+                        <p>Get notified in one place when something needs your attention.</p>
+                    </div>
+                    <div class="card">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+                        <h3>Private access</h3>
+                        <p>Your dashboard is behind a login, with password reset by email code.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Log in, sign up, change password, change username ------------------------------------------------>
+            <!-- note:
+             Di na iseeseparate files yung mga code sa loob nito, gawan nyo nalang ng interface na pinapaita sila one at a time.
+              ------------------------------------------------>
+            <section class="panel-section" id="access">
+                <div class="access">
+                    <div class="section-head">
+                        <h2>Get started</h2>
+                        <p>Create an account, or log in to open your dashboard. You can also reset your password or change your username here.</p>
+                    </div>
+
+                    <div class="access-card">
+                        <div class="tabs">
+                            <button type="button" data-form="register" class="active" onclick="showForm('register')">Register</button>
+                            <button type="button" data-form="login" onclick="showForm('login')">Log in</button>
+                            <button type="button" data-form="forgot" onclick="showForm('forgot')">Forgot Password</button>
+                            <button type="button" data-form="changeName" onclick="showForm('changeName')">Change Username</button>
+                        </div>
+
+                        <!-- Registration ------------------------------------------------>
+                        <form id="register" class="panel active" action="/register" method="POST">
+                            <h3>Registration form</h3>
+                            <input type="text" name="username" placeholder="Username" maxlength="20" required>
+                            <input type="email" name="email" placeholder="Email" required>
+                            <input type="tel" name="phone_number" placeholder="Phone number" required>
+                            <input type="password" name="password" placeholder="Password" required>
+                            <button class="btn" type="submit">Register</button>
+
+                            <p id="forgetRoute"><a href="#forgot" onclick="showForm('forgot'); return false;">Forgot password?</a></p>
+                        </form>
+
+                        <!-- Log in ------------------------------------------------>
+                        <form id="login" class="panel" action="/login" method="POST">
+                            <h3>Log in form</h3>
+                            <input type="text" name="username" placeholder="Username" required>
+                            <input type="password" name="password" placeholder="Password" required>
+                            <button class="btn" type="submit">Log in</button>
+                        </form>
+
+                        <!-- Changing password ------------------------------------------------>
+                        <div id="forgot" class="panel">
+                            <form class="subform" action="/forgotPass" method="POST">
+                                <h3>Verify username first</h3>
+                                <input type="text" name="username" placeholder="Enter your username" required>
+                                <button class="btn" type="submit">Send Code</button>
+                            </form>
+
+                            <form class="subform" action="/changePass" method="POST">
+                                <h3>Change Password</h3>
+                                <input type="text" name="username" placeholder="Enter your username" required>
+                                <input type="text" name="code" placeholder="Enter your code" required>
+                                <input type="password" name="newPassword" placeholder="New password" required>
+                                <button class="btn" type="submit">Change Password</button>
+                            </form>
+                        </div>
+                        <!-- Changing password ------------------------------------------------>
+
+                        <!-- Changing username ------------------------------------------------>
+                        <form id="changeName" class="panel" action="/changeName" method="POST">
+                            <h3>Change username</h3>
+                            <input type="text" name="oldUsername" placeholder="Old username" required>
+                            <input type="text" name="newUsername" placeholder="New username" maxlength="20" required>
+                            <input type="password" name="password" placeholder="Password" required>
+                            <button class="btn" type="submit">Change Username</button>
+                        </form>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <footer class="site-footer">
+            Flux Labs &middot; Embedded systems project
+        </footer>
+
+        <script>
+            // Shows one form at a time and supports links like /index.html#login
+            function showForm(id, updateHash) {
+                const target = document.getElementById(id);
+                if (!target || !target.classList.contains('panel')) {
+                    return;
+                }
+
+                document.querySelectorAll('.panel').forEach(function (panel) {
+                    panel.classList.remove('active');
+                });
+                target.classList.add('active');
+
+                document.querySelectorAll('.tabs button').forEach(function (button) {
+                    button.classList.toggle('active', button.dataset.form === id);
+                });
+
+                if (updateHash !== false) {
+                    history.replaceState(null, '', '#' + id);
+                }
+                document.getElementById('menu').classList.remove('open');
+            }
+
+            function openFromHash() {
+                const id = location.hash.slice(1);
+                const target = document.getElementById(id);
+
+                if (target && target.classList.contains('panel')) {
+                    showForm(id);
+                    document.getElementById('access').scrollIntoView();
+                } else {
+                    showForm('register', false);
+                }
+            }
+
+            window.addEventListener('DOMContentLoaded', openFromHash);
+            window.addEventListener('hashchange', openFromHash);
+        </script>
     </body>
 </html>

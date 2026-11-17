@@ -21,7 +21,10 @@ function findUsername(username) {
 }
 
 function verifyPassword ( username , password ) {
-    const user = findUsername(username);    
+    const user = findUsername(username);
+    if (!user) {
+        return false;
+    }
     const matched = Bycrypt.compareSync(password , user.password_hash);
     return matched;
 }
@@ -33,12 +36,12 @@ function storedCode( username , code ) {
 };
 function verifyCode ( username , code ) {
     const storedCode = verificationCodes[username];
-    if (storedCode == code ) {
+    if (storedCode !== undefined && storedCode == code ) {
         return true;
     } else {
         return false;
     }
-    
+
 };
 
 
@@ -50,6 +53,7 @@ function changePassword ( username , code , newPassword ) {
     const newPass = Bycrypt.hashSync(newPassword , 10);
     const addnewPass = dbConnect.prepare('UPDATE users SET password_hash = ? WHERE username = ?')
     addnewPass.run(newPass , username);
+    delete verificationCodes[username];   // a code works only once
     return true;
 }
 
